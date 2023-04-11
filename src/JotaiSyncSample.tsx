@@ -1,14 +1,9 @@
 import { atom, useAtomValue, useSetAtom } from "jotai";
-import { FC, Suspense } from "react";
+import { FC, Suspense, useEffect } from "react";
 
-const count1Atom = atom(
-  (async () => {
-    return 0;
-  })()
-);
-const count10Atom = atom(async (get) =>
-  Math.floor((await get(count1Atom)) / 10)
-);
+const count1Atom = atom(-1);
+
+const count10Atom = atom((get) => Math.floor(get(count1Atom) / 10));
 
 const Count1: FC = () => {
   const count1 = useAtomValue(count1Atom);
@@ -23,9 +18,7 @@ const Count10: FC = () => {
 
 const CountUp: FC = () => {
   const setCount1 = useSetAtom(count1Atom);
-  return (
-    <button onClick={() => setCount1(async (n) => (await n) + 1)}> +1 </button>
-  );
+  return <button onClick={() => setCount1((n) => n + 1)}> +1 </button>;
 };
 
 const Fallback: FC = () => {
@@ -33,10 +26,17 @@ const Fallback: FC = () => {
   return <div>Loading...</div>;
 };
 
-const JotaiSample: FC = () => {
+const JotaiSyncSample: FC = () => {
+  const setCount1 = useSetAtom(count1Atom);
+  useEffect(() => {
+    (async () => {
+      setCount1(0);
+    })();
+  }, []);
+
   return (
     <div>
-      <h2>Jotai</h2>
+      <h2>Jotai(Sync)</h2>
       <Suspense fallback={<Fallback />}>
         <Count1 />
         <Count10 />
@@ -46,4 +46,4 @@ const JotaiSample: FC = () => {
   );
 };
 
-export default JotaiSample;
+export default JotaiSyncSample;
